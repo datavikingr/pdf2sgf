@@ -9,13 +9,13 @@ import shutil
 
 PDF_DIR = Path("pdfs")
 PG_DIR = Path("pages")
-PNG_DIR = Path("pngs")
+HPG_DIR = Path("page_slices")
 PROBLEM_DIR = Path("problems")
 SGF_DIR = Path("sgfs")
 IMG2SGF_SCRIPT = Path("img2sgf.py")
 
 PG_DIR.mkdir(exist_ok=True)
-PNG_DIR.mkdir(exist_ok=True)
+HPG_DIR.mkdir(exist_ok=True)
 PROBLEM_DIR.mkdir(exist_ok=True)
 SGF_DIR.mkdir(exist_ok=True)
 
@@ -50,8 +50,8 @@ def process_pdf(pdf_path):
         cropped = crop_margins(image) # Step 1: Crop margins
         left, right = split_vertically(cropped) # Step 2: Split into left/right
         # Step 3: Save halves
-        left_path = PNG_DIR / f"{base_name}_left.png"
-        right_path = PNG_DIR / f"{base_name}_right.png"
+        left_path = HPG_DIR / f"{base_name}_left.png"
+        right_path = HPG_DIR / f"{base_name}_right.png"
         left.save(left_path)
         right.save(right_path)
         print(f"Saved: {left_path.name}, {right_path.name}")
@@ -108,16 +108,16 @@ if __name__ == "__main__":
     for pdf_file in PDF_DIR.glob("*.pdf"): # Process all PDFs
         process_pdf(pdf_file)
     problem_counter = [1]
-    for img_file in sorted(PNG_DIR.glob("*.png")):
+    for img_file in sorted(HPG_DIR.glob("*.png")):
         detect_problem_regions(img_file, problem_counter)
     for prob_file in sorted(PROBLEM_DIR.glob("*.png")):
         output_path = prob_file.with_suffix(".sgf")
         player = "black"
-        print(f"Converting {img_path.name} → {output_path.name}")
+        print(f"Converting {prob_file.name} → {output_path.name}")
         try:
             subprocess.run(["python", "img2sgf.py", str(prob_file), str(output_path), player])
             print(f"Saved: {output_path.name}")
         except Exception as e:
-            print(f"Exception while processing {img_path.name}: {e}")
+            print(f"Exception while processing {prob_file.name}: {e}")
             continue
     

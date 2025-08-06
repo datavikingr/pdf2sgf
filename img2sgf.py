@@ -14,12 +14,13 @@
 # Future enhancements
 #   problem with L19 diagrams (and others): stones close together don't get detected as circles.  May need to replace Hough circle detection with contour detection?
 
-# Patched for headless mode, Alexander Haskins, 2025
-# patched for data processing use.
+# Patched for headless mode
+# Alexander Haskins, 2025
+# 
 # Syntax: python img2sgf.py [input.png] [output.sgf] [player_to_play] 
 # [input.png] [output.sgf] are mandatory - both being presented activates headless mode
 # [player_to_play] is optional. It may be "black", "b", "white", "w";
-# if blank, the script will default to counting and comparing stones
+# if blank, the script will default to counting and comparing # of stones
 
 # Part 1: imports/setup
 
