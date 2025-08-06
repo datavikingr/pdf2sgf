@@ -209,4 +209,10 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Exception while processing {prob_file.name}: {e}")
             continue
+    shutil.rmtree(PG_DIR)
+    shutil.rmtree(HPG_DIR)
+    shutil.rmtree(PROBLEM_DIR)
+    PG_DIR.mkdir(exist_ok=True)
+    HPG_DIR.mkdir(exist_ok=True)
+    PROBLEM_DIR.mkdir(exist_ok=True)
     

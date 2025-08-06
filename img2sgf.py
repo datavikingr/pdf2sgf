@@ -79,6 +79,9 @@ log_width = 650
 log_height = 800
 log_visible = False
 
+HEADLESS = False
+player_to_play = None
+
 class Direction(Enum):
   HORIZONTAL = 1
   HORIZ = 1
@@ -125,7 +128,7 @@ def crop_and_rotate_image():
 def process_image():
   global input_image_np, edge_detected_image_np, edge_detected_image_PIL, \
          circles, circles_removed_image_np, circles_removed_image_PIL, \
-         grey_image_np, region_PIL
+         grey_image_np, region_PIL, HEADLESS
   # photos (_PIL images) need to be global so that the garbage collector doesn't
   # clean them up and blank out the canvases
   # numpy images (_np) are used by other functions
@@ -507,7 +510,7 @@ def align_board(b, a):
 
 def identify_board():
   global detected_board, full_board, stone_brightnesses, \
-         num_black_stones, num_white_stones
+         num_black_stones, num_white_stones, player_to_play
 
   log("Guessing stone colours based on a threshold of " + str(black_stone_threshold))
   detected_board = np.zeros((hsize, vsize))
@@ -561,7 +564,7 @@ def identify_board():
 
 def find_grid():
   global valid_grid, board_ready, circles, vsize, hsize, hspace, vspace, \
-         hcentres, vcentres, hcentres_complete, vcentres_complete
+         hcentres, vcentres, hcentres_complete, vcentres_complete, HEADLESS
   # All the above are needed as inputs to identify_board() --
   #   easier to make them global rather than pass them in and out
 
@@ -636,7 +639,7 @@ def initialise_parameters():
   # common to open_file() and screen_capture()
   global region_PIL, image_loaded, found_grid, valid_grid, \
          board_ready, board_edited, board_alignment, \
-         previous_rotation_angle, black_stone_threshold, selection_global
+         previous_rotation_angle, black_stone_threshold, selection_global, HEADLESS
 
   image_loaded = True
   found_grid   = False
@@ -833,7 +836,7 @@ def to_SGF(board):
 
 
 def save_SGF():
-  global output_file
+  global output_file, full_board
   if output_file is not None:
     output_file = filedialog.asksaveasfilename(initialfile = output_file)
   else:
@@ -844,7 +847,7 @@ def save_SGF():
   log("Saved to file " + output_file)
 
 def headless_save_SGF():
-  global output_file
+  global output_file, full_board
   if output_file is None:
     output_file = input("output file name? ")
   sgf = open(output_file, "w")
