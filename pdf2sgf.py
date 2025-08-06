@@ -111,7 +111,7 @@ if __name__ == "__main__":
     for img_file in sorted(HPG_DIR.glob("*.png")):
         detect_problem_regions(img_file, problem_counter)
     for prob_file in sorted(PROBLEM_DIR.glob("*.png")):
-        output_path = prob_file.with_suffix(".sgf")
+        output_path = SGF_DIR / prob_file.with_suffix(".sgf").name
         player = "black"
         print(f"Converting {prob_file.name} → {output_path.name}")
         try:
