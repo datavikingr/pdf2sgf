@@ -10,13 +10,13 @@ import shutil
 PDF_DIR = Path("pdfs")
 PG_DIR = Path("pages")
 PNG_DIR = Path("pngs")
-REGION_DIR = Path("regions")
+PROBLEM_DIR = Path("problems")
 SGF_DIR = Path("sgfs")
 IMG2SGF_SCRIPT = Path("img2sgf.py")
 
 PG_DIR.mkdir(exist_ok=True)
 PNG_DIR.mkdir(exist_ok=True)
-REGION_DIR.mkdir(exist_ok=True)
+PROBLEM_DIR.mkdir(exist_ok=True)
 SGF_DIR.mkdir(exist_ok=True)
 
 MARGIN = 150 # 0.5in on a 300 dpi page
@@ -105,11 +105,13 @@ def detect_problem_regions(image_path: Path, counter: list):
     img_rgb = cv2.imread(str(image_path))  # original for saving
     for idx, (y1, y2) in enumerate(merged):
         crop = img_rgb[y1:y2, :]
-        #out_path = REGION_DIR / f"{image_path.stem}_prob{idx+1}.png"
-        out_path = REGION_DIR / f"problem{counter[0]}.png"
+        #out_path = PROBLEM_DIR / f"{image_path.stem}_prob{idx+1}.png"
+        out_path = PROBLEM_DIR / f"problem{counter[0]}.png"
         cv2.imwrite(str(out_path), crop)
         print(f"  ✅ Saved: {out_path.name}")
         counter[0] += 1
+
+
 
 if __name__ == "__main__":
     for pdf_file in PDF_DIR.glob("*.pdf"): # Process all PDFs
@@ -117,5 +119,8 @@ if __name__ == "__main__":
     problem_counter = [1]
     for img_file in sorted(PNG_DIR.glob("*.png")):
         detect_problem_regions(img_file, problem_counter)
-
+    for prob_file in sorted(PROBLEM_DIR.glob("*.png")):
+        output_path = prob_file.with_suffix(".sgf")
+        player = "black"
+        subprocess.run(["python", "img2sgf.py", str(prob_file), str(output_path), player])
     
