@@ -66,10 +66,10 @@ def detect_column_count(image) -> int:
         image = np.array(image.convert("L"))  # Convert PIL to grayscale NumPy
     elif len(image.shape) == 3 and image.shape[2] == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    if img is None:
+    if image is None:
         print("⚠️ Could not read image.")
         return 0
-    _, binary = cv2.threshold(img, 200, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(image, 200, 255, cv2.THRESH_BINARY_INV)
     # Close small vertical gaps to merge text blocks
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 100))
     closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
