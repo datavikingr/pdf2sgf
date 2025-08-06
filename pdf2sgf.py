@@ -6,6 +6,7 @@ from PIL import Image
 import subprocess
 import os
 import shutil
+import pytesseract
 
 PDF_DIR = Path("pdfs")
 PG_DIR = Path("pages")
@@ -48,6 +49,15 @@ def split_thirds_vertically(img: Image.Image): #  -> Image.Image, Image.Image
     center_half = img.crop((left_mid, 0, right_mid, height))
     right_half = img.crop((right_mid, 0, width, height))
     return left_half, center_half, right_half
+
+def detect_player_from_text(img: Image.Image) -> str:
+    text = pytesseract.image_to_string(img).lower()
+    if "white to play" in text or "white" in text:
+        return "white"
+    elif "black to play" in text or "black" in text:
+        return "black"
+    else:
+        return "black"  # default fallback
 
 def detect_column_count(image) -> int:
     #Accepts a PIL.Image.Image or np.ndarray.
@@ -168,7 +178,15 @@ def detect_problem_regions(image_path: Path, counter: list):
         #out_path = PROBLEM_DIR / f"{image_path.stem}_prob{idx+1}.png"
         out_path = PROBLEM_DIR / f"problem{counter[0]}.png"
         cv2.imwrite(str(out_path), crop)
-        print(f"Saved: {out_path.name}")
+        # Crop footer band for OCR
+        footer_height = 50
+        footer_band = img_rgb[y2:y2 + footer_height, :]
+        footer_img = Image.fromarray(footer_band)
+        player = detect_player_from_text(footer_img)
+        # Save player info alongside image, e.g. as a sidecar txt file:
+        player_path = PROBLEM_DIR / f"{out_path.stem}.player"
+        player_path.write_text(player)
+        print(f"Saved: {out_path.name} ({player})")
         counter[0] += 1
 
 if __name__ == "__main__":
@@ -179,7 +197,11 @@ if __name__ == "__main__":
         detect_problem_regions(img_file, problem_counter)
     for prob_file in sorted(PROBLEM_DIR.glob("*.png")):
         output_path = SGF_DIR / prob_file.with_suffix(".sgf").name
-        player = "black"
+        player_path = prob_file.with_suffix(".player")
+        if player_path.exists():
+            player = player_path.read_text().strip()
+        else:
+            player = "black"
         print(f"Converting {prob_file.name} → {output_path.name}")
         try:
             subprocess.run(["python", "img2sgf.py", str(prob_file), str(output_path), player])
