@@ -41,30 +41,23 @@ def split_vertically(img: Image.Image):
     return left_half, right_half
 
 def process_pdf(pdf_path):
-    print(f"\n📄 Processing {pdf_path.name}")
+    print(f"\nProcessing {pdf_path.name}")
     images = convert_from_path(pdf_path, dpi=300)
-
     for page_num, image in enumerate(images):
         base_name = f"{pdf_path.stem}_page{page_num+1}"
         full_img_path = PG_DIR / f"{base_name}.png"
         image.save(full_img_path)
-
-        # Step 1: Crop margins
-        cropped = crop_margins(image)
-
-        # Step 2: Split into left/right
-        left, right = split_vertically(cropped)
-
+        cropped = crop_margins(image) # Step 1: Crop margins
+        left, right = split_vertically(cropped) # Step 2: Split into left/right
         # Step 3: Save halves
         left_path = PNG_DIR / f"{base_name}_left.png"
         right_path = PNG_DIR / f"{base_name}_right.png"
         left.save(left_path)
         right.save(right_path)
-
         print(f"Saved: {left_path.name}, {right_path.name}")
 
 def detect_problem_regions(image_path: Path, counter: list):
-    print(f"\n🔍 Detecting in {image_path.name}")
+    print(f"\nDetecting in {image_path.name}")
     img = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
 
     # Binarize: white = 255, black = 0
@@ -90,7 +83,7 @@ def detect_problem_regions(image_path: Path, counter: list):
     # Merge regions separated by less than GAP_THRESHOLD
     merged = []
     if not regions:
-        print(f"⚠️ No active regions found in {image_path.name}")
+        print(f"No active regions found in {image_path.name}")
         return
     prev_start, prev_end = regions[0]
     for start, end in regions[1:]:
@@ -108,10 +101,8 @@ def detect_problem_regions(image_path: Path, counter: list):
         #out_path = PROBLEM_DIR / f"{image_path.stem}_prob{idx+1}.png"
         out_path = PROBLEM_DIR / f"problem{counter[0]}.png"
         cv2.imwrite(str(out_path), crop)
-        print(f"  ✅ Saved: {out_path.name}")
+        print(f"Saved: {out_path.name}")
         counter[0] += 1
-
-
 
 if __name__ == "__main__":
     for pdf_file in PDF_DIR.glob("*.pdf"): # Process all PDFs
@@ -122,5 +113,11 @@ if __name__ == "__main__":
     for prob_file in sorted(PROBLEM_DIR.glob("*.png")):
         output_path = prob_file.with_suffix(".sgf")
         player = "black"
-        subprocess.run(["python", "img2sgf.py", str(prob_file), str(output_path), player])
+        print(f"Converting {img_path.name} → {output_path.name}")
+        try:
+            subprocess.run(["python", "img2sgf.py", str(prob_file), str(output_path), player])
+            print(f"Saved: {output_path.name}")
+        except Exception as e:
+            print(f"Exception while processing {img_path.name}: {e}")
+            continue
     
