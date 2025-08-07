@@ -4,9 +4,7 @@
 I wanted a repository of Go problems that I could launch in `gnugo --mode=ascii` because I'm a terminal dork like that. I couldn't find any sgf archives of any real volume, but I could find pdf collections of these problems. 
 
 ## img2sgf
-Then poking around GitHub a little bit, I found some abandonware, namely [img2sgf](https://github.com/hanysz/img2sgf), that would suit me just fine. 
-
-However, I realized pretty quickly it could not operate headlessly, in spite of some suspicious looking sys.argv calls at the end of the script.
+Then poking around GitHub a little bit, I found some abandonware, namely [img2sgf](https://github.com/hanysz/img2sgf), that would suit me just fine. However, I realized pretty quickly it did not operate headlessly, in spite of some suspiciously convenient looking sys.argv calls at the end of the script.
 
 ```python
 if len(sys.argv)>3:
@@ -29,15 +27,23 @@ So I patched img2sgf. It's dirty (opens and closes a tkinter window for every si
 ## Wrapper Script
 So first I had to process the pdfs into pngs so that img2sgf could handle them, and everything after that kinda flowed from there.
 
-Basically, we do some slicing and dicing to tighten our OCR detection windows, so we can cleanly separate the problems from each other, filter out some chaff (title pages, front matter), and then feed the problems into img2sgf en masse, one png at a time. Add a little "who has the next move?" OCR detection for exactly 3 out of 68 pdfs (* *sigh* *), and out spits a collection of tens of thousands of Go problems, which you can find in `sgfs/`. 
+Basically, we do some slicing and dicing to tighten our OCR detection windows, so we can cleanly separate the problems from each other, filter out some chaff (title pages, front matter), and then feed the problems into img2sgf en masse, one png at a time. Add a little "who has the next move?" OCR detection for exactly 3 out of 68 pdfs, and out spits a collection of tens of thousands of Go problems, which you can find in `sgfs/`. 
 
-`pages/`, `page_slices/`, and `problems/` will be cleaned out every run. If you're intersted in those intermediary steps, clone the repo, comment out those lines, and run it. Be advised, it will take a *while*. 
+`pages/`, `page_slices/`, and `problems/` will be cleaned out every *completed* run (and `cleanup.py` for your convenience when the run doesn't complete). If you're intersted in those intermediary steps, clone the repo, comment out those lines, and run it locally. Be advised, it will take a *while*. I will not be posting those results. They're in the .gitignore accordingly.
 
-## Wait, isn't this just what tasuki did for https://tsumego.tasuki.org/, but in reverse?
+## Wait, isn't this just what [tasuki](https://tsumego.tasuki.org/) did, but in reverse?
 
-Yes, exactly, but with the addition of Olivier's [101books](https://101books.github.io/) of problems. The pdfs from both sources can be found in `pdfs/`. And you can find the source*code* for each of these sources here:
+Yes, exactly, but with the addition of Olivier's [101books](https://101books.github.io/) of problems - or, rather what parses, anyway. The pdfs from both sources can be found in `pdfs/`. And you can find the source*code* for each of these sources here:
  - [tasuki's source](https://github.com/tasuki/tsumego-web)
  - [Olivier's source](https://github.com/101books/101books.github.io)
 
 ## The problems are out of order compared to their pdf versions
 This is expected. If you'd like to specifically cross-reference which file is which problem, see `log.txt`. Use CTRL+F and start from the top, one intermediary file/step at a time and you'll find the sgf you're looking for.
+
+# #TODO:
+ - butter up some sutomatic tuning attempts, to populate full_board more often
+ - Investigate first-Alex's L19 diagram problems - which I think are also involved in my empty full_boards
+ - consolidate the scripts into one. It's pretty obvious there's a lot of waste here.
+ - Give it a solid run and post the results. 
+ - "opens and closes a tkinter window for every single problem that runs through it"
+
